@@ -37,6 +37,13 @@ overwrites a good file with a failed encode.
 
 ## The example films
 
+`examples/money-quest/` — a 30 s two-character adventure: a chibi person rig (built from a cartoon model
+sheet) and the orange critter go from an empty wallet to a treasure chest: map, idea forest, a canyon the
+critter bridges by stretching flat, a staircase of giant cards, JACKPOT.
+
+![crossing the canyon on the critter-bridge](docs/money-quest.jpg)
+
+
 `examples/claude-balloon/` — a 30 s seamless loop in faceted low-poly poster style: the orange hero drifts
 through a dusk canyon in a hot-air balloon, birds cross, clouds wrap, the river shimmers. Ambient score.
 
@@ -106,6 +113,7 @@ plugins/claude-animation/skills/claude-animation/
   lib/fx.mjs               hit-stop, screen shake, particles, rings, flashes, comic words, damage numbers, afterimages
   lib/rigs/critter.mjs     a blocky action hero (run, jump, flip, punch, kick, hurt, charge)
   lib/rigs/bug.mjs         a beetle enemy and boss
+  lib/rigs/chibi.mjs       a big-head cartoon person with joints, styled from a model sheet
   lib/rigs/ant.mjs         the detailed ant (+ build-up layers and construction guides)
   lib/rigs/bean.mjs        bean-bodied people for the brush-watercolour look
   lib/film.mjs             render / sheet / strip / verify, exposure (ones, twos, holds)
@@ -116,6 +124,7 @@ plugins/claude-animation/skills/claude-animation/
   scripts/rig-sheet.mjs    the pose sheet a rig must pass
   templates/               film-template.mjs, beat-sheet.md
   references/              workflow, detail, characters, motion, styles, sound, traps, prior-art
+examples/money-quest/      the 30 s two-character adventure
 examples/claude-balloon/   the 30 s low-poly ambient loop
 examples/claude-game/      the 30 s video-game short
 examples/ant-colony/       the 32 s colony film

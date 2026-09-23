@@ -59,6 +59,16 @@ ant; left of the line draw the next `look`, right of it the previous one (two cl
 Stages: guides → `{ink:1}` → `{ink:1, fill:1}` → full. Each draw call in the rig is classed by colour into
 ink / fill / tex, so any new detail added to the rig joins the right layer automatically.
 
+## The chibi person (`lib/rigs/chibi.mjs`)
+
+For turning a real person's cartoon (a model sheet) into a rig that can act: read the sheet, then write a
+look preset: `{ skin, shirt, pants, shoes, hair, pocket, pen, spikes, glasses }`. Keep the sheet's shapes
+(hair silhouette, glasses shape, the one signature detail like a pocket pen); proportions are fixed by the
+rig (head ≈ 40 % of height). Test with a pose sheet (rest, run ×2, jump, point, wave, shrug, cheer, carry,
+flipped) next to the model sheet before any film. Arms take `[shoulder°, elbow°]` or a preset; a prop
+goes in `holdR` / `holdL`. When the hair came out too tall and needle-like, more, shorter tufts (22, tip
+93–104 px) matched a "bushy" sheet.
+
 ## The bean cast (`lib/rigs/bean.mjs`, brush-ink + watercolour look)
 
 `person(pen, x, groundY, s, opts, t)` draws with a `Pen`, so the figure draws itself on (`pen.begin(name,

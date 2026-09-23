@@ -43,6 +43,7 @@ recap and a set of storybook insect films — and took a render to find.
 | `fx.mjs` | `timeWarp` (hit-stop: game time freezes on contact, effects keep running), `shake`, `burstParticles` (spark / debris / dust / confetti / ember), `landDust`, `ring`, `flashAlpha`, `comicText`, `floatText`, `afterimages`, `starburst`, `heart` |
 | `rigs/critter.mjs` | a blocky action hero: run, jump, flip, squash & stretch, punch, kick, hurt, charge aura, expressions |
 | `rigs/bug.mjs` | a beetle enemy (and boss with horns): scuttle, jaw, flash, squash, spin |
+| `rigs/chibi.mjs` | a big-head cartoon person with real joints, styled by a look preset (hair, glasses, shirt, pocket + pen, pants, shoes): walk / run / jump / cheer / point / wave / carry, eyes, brows, lip-sync mouths, blush, sweat |
 | `rigs/bean.mjs` | `person bust bubble flagCloth hat SKIN` |
 | `film.mjs` | `run({...})` → `render / sheet / strip / verify`; `exposure(t, track, fps)` for ones / twos / holds |
 
@@ -88,7 +89,8 @@ node $SK/scripts/music.mjs bed.wav --dur 5 --end 4.4
 node $SK/scripts/sound.mjs cues.json out/template.mp4 out/final.mp4 --bed bed.wav
 ```
 
-Worked films in the repo: `examples/claude-balloon/` — a 30 s seamless ambient loop in faceted low-poly
+Worked films in the repo: `examples/money-quest/` — a 30 s two-hander adventure (the chibi rig + the critter);
+`examples/claude-balloon/` — a 30 s seamless ambient loop in faceted low-poly
 (every motion periodic in 30 s, audio in 4 × 7.5 s bars so it loops too); `examples/claude-game/` — a 30 s video-game short (platforming, bugs, a boss fight
 with hit-stop, combo, special, K.O., chiptune from `scripts/chiptune.mjs`); and `examples/ant-colony/` — 32 s, 16:9: a sketch → ink → colour → polish build-up,
 a leafcutter cutting and carrying a leaf through a meadow, a dive into a nest cross-section (fungus garden,
