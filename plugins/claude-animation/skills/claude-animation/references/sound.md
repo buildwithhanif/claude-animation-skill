@@ -10,6 +10,9 @@
   ~0.1 s of walking sells a small character), `fall` (descending whistle), `chime`.
 - `--bed-at 2.0` starts the music late: a hook that plays on typing and clicks alone, then the bed lands
   with the first cut, hits harder than music from frame 0.
+- **`scripts/chiptune.mjs`**: an original game soundtrack (pulse lead, triangle bass, noise drums) with
+  sections placed on absolute times: `--sections "level:0-13.8,alarm:13.8-15.4,boss:15.4-25.1,fanfare:25.1-27.7,outro:27.7-30"`.
+  Compute the times after hit-stop (`tw.real`), or the boss music starts before the boss.
 - **`scripts/music.mjs`** makes an original ukulele bed (C–G–Am–F, pentatonic bell, shaker, soft kick):
   `--dur`, `--bpm`, `--end` (a final strum + bell on the last beat), `--quiet a-b,c-d` (hold one soft chord
   under sad or serious beats).

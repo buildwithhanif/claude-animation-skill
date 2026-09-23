@@ -7,7 +7,8 @@
 // sfx: pop | whoosh | whip | tick | thump | crack | sparkle | buzz | scratch | drip | boing | riser |
 //      splash | click | step | fall | chime   (optional per cue: vol, dur, pan -1..1, pitch multiplier)
 // Place a cue ~0.03 s BEFORE its visual: sound that lands late reads as broken, early reads as synced.
-// The mix gets a two-pass loudnorm (default -16 LUFS, -1.5 dBTP) and is muxed onto the picture.
+// The mix gets a two-pass loudnorm (default -16 LUFS), then a 4x-oversampled limiter at -3.1 dBFS (AAC adds ~1.5 dB of inter-sample overshoot) so dense
+// hit-heavy mixes can't overshoot (a game mix hit +1.6 dBTP without it), and is muxed onto the picture.
 import fs from "node:fs";
 import { execFileSync } from "node:child_process";
 
@@ -62,7 +63,7 @@ if (process.argv[1] && process.argv[1].endsWith("sound.mjs")) {
   const tmp = out.replace(/\.mp4$/, "") + ".mix.wav"; writeWav(tmp, L, Rr);
   const I = opt("--lufs", "-16");
   let meas; try { meas = JSON.parse((execFileSync("sh", ["-c", `ffmpeg -hide_banner -nostats -i "${tmp}" -af loudnorm=I=${I}:TP=-1.5:print_format=json -f null - 2>&1`]).toString().match(/\{[^{]*input_i[\s\S]*?\}/) || ["{}"])[0]); } catch { meas = {}; }
-  const ln = meas.input_i ? `loudnorm=I=${I}:TP=-1.5:LRA=11:measured_I=${meas.input_i}:measured_TP=${meas.input_tp}:measured_LRA=${meas.input_lra}:measured_thresh=${meas.input_thresh}:linear=true,aresample=48000` : `loudnorm=I=${I}:TP=-1.5`;
+  const ln = meas.input_i ? `loudnorm=I=${I}:TP=-1.5:LRA=11:measured_I=${meas.input_i}:measured_TP=${meas.input_tp}:measured_LRA=${meas.input_lra}:measured_thresh=${meas.input_thresh}:linear=true,aresample=192000,alimiter=limit=0.7:level=false:attack=1:release=40,aresample=48000` : `loudnorm=I=${I}:TP=-1.5,alimiter=limit=0.7:level=false`;
   execFileSync("ffmpeg", ["-v", "error", "-y", "-i", pic, "-i", tmp, "-af", ln, "-c:v", "copy", "-c:a", "aac", "-b:a", "192k", "-shortest", "-movflags", "+faststart", out]);
   fs.unlinkSync(tmp);
   console.log("wrote", out, meas.input_i ? `(mix was ${meas.input_i} LUFS)` : "");

@@ -47,6 +47,21 @@ In the Pen, boil is opt-in: `pen.begin(name, reveal, { boil: 10, t })`.
 - Cuts: hard cuts on the beat. Transitions only when they mean something (zoom-out = "the world is
   bigger than this", iris = "and that's the end", whip = "meanwhile").
 
+## Action and game feel (from the game short)
+
+- **Write choreography in game time, render in real time.** `timeWarp(STOPS)` freezes game time for 2–3
+  frames on every contact (0.083 s; 0.125 for a big hit; 0.3 for the finisher) while sparks, rings and
+  comic words keep moving in real time. Convert cues with `tw.real(g)` so sound lands on the freeze.
+- **Squash on landing** (1.35 → 1 over 0.18 s), **stretch in the air** (0.8), **anticipation** before a jump
+  (1.22 for ~2 frames). A dash is 0.72 stretch + 0.12 lean + afterimages + speed lines.
+- **Every hit = five things on the same frame**: target flash (cap ~0.6 or the body turns into a white
+  hole), sparks, a ring, a comic word or a damage number, screen shake. Plus a sound pair (thump + crack).
+- **Knockback reads as a hit** only with a hurt face, a back-spin and invulnerability flicker afterwards.
+- **A world camera zoom of ~1.3** around the ground line: at 1× a 130 px hero on 1920 reads as a UI icon.
+- Boss beats: WARNING bars before it appears, a drop with squash + ring + debris, a roar (jaw + rings),
+  a readable attack pattern the hero dodges, a combo, a hit back, a charge (darken the screen, embers),
+  the finisher, a drain on the HP bar, K.O., LEVEL CLEAR.
+
 ## Effects vocabulary
 
 burst lines (a pop, a realisation) · speed lines (fast travel) · impact lines (landing) · dirt clods (dig)
