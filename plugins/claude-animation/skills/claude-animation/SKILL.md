@@ -20,6 +20,7 @@ recap and a set of storybook insect films — and took a render to find.
 | **Make it more detailed** (materials, textures, characters) | `references/detail.md` — the detail bible. Read it before drawing any surface |
 | Draw / pose / walk the ant, or build a new creature rig | `references/characters.md`, `lib/rigs/ant.mjs` |
 | A colony: leaves, brood, fungus, roots, a nest cross-section with walkable tunnels | `lib/colony.mjs` |
+| **Faceted low-poly poster art** (flat vector landscapes, ambient seamless loops) | `lib/lowpoly.mjs`, `references/styles.md` § 5, `examples/claude-balloon/` |
 | **Action / video-game feel**: jumps, punches, hit-stop, shake, sparks, combo, boss bar | `lib/fx.mjs`, `lib/rigs/critter.mjs`, `lib/rigs/bug.mjs`, `examples/claude-game/` |
 | People (bean body, stick limbs, watercolour) | `lib/rigs/bean.mjs` |
 | Timing, acting, cuts, camera, transitions | `references/motion.md` |
@@ -38,6 +39,7 @@ recap and a set of storybook insect films — and took a render to find.
 | `nature.mjs` | `sprout melonLeaf tendril vine blossom bee drop` |
 | `rigs/ant.mjs` | `ant(ctx, x, groundY, s, pose)` — the detailed ant (`pose.look` = ink / fill / tex layers for build-up reveals); `antGuides()` blue construction lines; `seed()` |
 | `colony.mjs` | `leaf leafPiece egg larva cocoon seedGrain fungus roots nestCanvas` (chambers + tunnels baked into soil, returns `pathOf` walkers) |
+| `lowpoly.mjs` | `facetMass` (bake a mass into lit triangles from a ramp, with dome / fade / haze), `ridge`, `skyGradient`, `facetCloud`, `RAMPS` (canyon, dusk, mesa, forest, ice, water, balloon, cloud) |
 | `fx.mjs` | `timeWarp` (hit-stop: game time freezes on contact, effects keep running), `shake`, `burstParticles` (spark / debris / dust / confetti / ember), `landDust`, `ring`, `flashAlpha`, `comicText`, `floatText`, `afterimages`, `starburst`, `heart` |
 | `rigs/critter.mjs` | a blocky action hero: run, jump, flip, squash & stretch, punch, kick, hurt, charge aura, expressions |
 | `rigs/bug.mjs` | a beetle enemy (and boss with horns): scuttle, jaw, flash, squash, spin |
@@ -86,7 +88,8 @@ node $SK/scripts/music.mjs bed.wav --dur 5 --end 4.4
 node $SK/scripts/sound.mjs cues.json out/template.mp4 out/final.mp4 --bed bed.wav
 ```
 
-Worked films in the repo: `examples/claude-game/` — a 30 s video-game short (platforming, bugs, a boss fight
+Worked films in the repo: `examples/claude-balloon/` — a 30 s seamless ambient loop in faceted low-poly
+(every motion periodic in 30 s, audio in 4 × 7.5 s bars so it loops too); `examples/claude-game/` — a 30 s video-game short (platforming, bugs, a boss fight
 with hit-stop, combo, special, K.O., chiptune from `scripts/chiptune.mjs`); and `examples/ant-colony/` — 32 s, 16:9: a sketch → ink → colour → polish build-up,
 a leafcutter cutting and carrying a leaf through a meadow, a dive into a nest cross-section (fungus garden,
 nursery, queen, stores, tunnels full of traffic), 240 sound cues from the timeline; renders in ~27 s.

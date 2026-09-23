@@ -37,6 +37,12 @@ overwrites a good file with a failed encode.
 
 ## The example films
 
+`examples/claude-balloon/` — a 30 s seamless loop in faceted low-poly poster style: the orange hero drifts
+through a dusk canyon in a hot-air balloon, birds cross, clouds wrap, the river shimmers. Ambient score.
+
+![the balloon loop](docs/balloon.jpg)
+
+
 `examples/claude-game/` — 30 s, 16:9 video-game short: an orange block hero runs, jumps and flips across
 a textured platform level, punches, kicks and stomps bugs, then fights a boss. Hit-stop on every contact,
 screen shake, sparks, comic words, damage numbers, a combo counter, a boss HP bar, a charged special, K.O.,
@@ -96,6 +102,7 @@ plugins/claude-animation/skills/claude-animation/
   lib/textures.mjs         paper, light bands, sun, moon, stars, grass, soil, night sky, fruit cells, film finish
   lib/nature.mjs           sprout, melon leaf, tendril, vine, blossom, bee, drop
   lib/colony.mjs           leaf, leaf piece, egg, larva, cocoon, seed, fungus, roots, nest cross-section
+  lib/lowpoly.mjs          faceted low-poly landscapes: lit triangles from gradient ramps, haze, clouds, ridges
   lib/fx.mjs               hit-stop, screen shake, particles, rings, flashes, comic words, damage numbers, afterimages
   lib/rigs/critter.mjs     a blocky action hero (run, jump, flip, punch, kick, hurt, charge)
   lib/rigs/bug.mjs         a beetle enemy and boss
@@ -105,9 +112,11 @@ plugins/claude-animation/skills/claude-animation/
   scripts/sound.mjs        synthesised SFX on a cue timeline + bed + loudnorm + mux
   scripts/music.mjs        an original ukulele bed of any length
   scripts/chiptune.mjs     an original video-game soundtrack with timed sections
+  scripts/ambient.mjs      an original ambient bed (pads, bells, wind) that loops
   scripts/rig-sheet.mjs    the pose sheet a rig must pass
   templates/               film-template.mjs, beat-sheet.md
   references/              workflow, detail, characters, motion, styles, sound, traps, prior-art
+examples/claude-balloon/   the 30 s low-poly ambient loop
 examples/claude-game/      the 30 s video-game short
 examples/ant-colony/       the 32 s colony film
 ```

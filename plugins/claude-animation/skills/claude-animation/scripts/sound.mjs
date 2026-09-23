@@ -5,7 +5,7 @@
 //
 // cues.json: [{ "sfx": "pop", "t": 0.94, "vol": .5 }, { "sfx": "whoosh", "t": 1.08, "dur": .5 }, ...]
 // sfx: pop | whoosh | whip | tick | thump | crack | sparkle | buzz | scratch | drip | boing | riser |
-//      splash | click | step | fall | chime   (optional per cue: vol, dur, pan -1..1, pitch multiplier)
+//      splash | click | step | fall | chime | chirp | burner   (optional per cue: vol, dur, pan -1..1, pitch multiplier)
 // Place a cue ~0.03 s BEFORE its visual: sound that lands late reads as broken, early reads as synced.
 // The mix gets a two-pass loudnorm (default -16 LUFS), then a 4x-oversampled limiter at -3.1 dBFS (AAC adds ~1.5 dB of inter-sample overshoot) so dense
 // hit-heavy mixes can't overshoot (a game mix hit +1.6 dBTP without it), and is muxed onto the picture.
@@ -35,6 +35,8 @@ export const SFX = {
   step: (d = .04) => tone(d, (t, u) => (Math.sin(2 * Math.PI * 900 * t) * .6 + R() * .3) * Math.exp(-t * 140) * .5),
   fall: (d = .45) => tone(d, (t, u) => Math.sin(2 * Math.PI * (1800 - 1300 * u) * t) * Math.min(1, u * 8) * (1 - u) * .35),
   chime: (d = 1.2) => tone(d, (t, u) => [1047, 1319, 1568, 2093].reduce((s, f, k) => s + (t > k * .07 ? Math.sin(2 * Math.PI * f * t) * Math.exp(-(t - k * .07) * 3.5) : 0), 0) * .2),
+  chirp: (d = .18) => tone(d, (t, u) => Math.sin(2 * Math.PI * (2600 + 1800 * Math.sin(u * Math.PI)) * t) * Math.sin(u * Math.PI) * (u < .45 || u > .55 ? 1 : .2) * .35),
+  burner: (d = 1.0) => { const a = bandNoise(d, 180, 900, (u) => .5 + .5 * Math.sin(u * Math.PI)); return tone(d, (t, u) => a[Math.floor(u * (a.length - 1))] * 1.4 * Math.min(1, u * 8) * (1 - u)); },
   buzz: (d = .6) => { let ph = 0; return tone(d, (t, u) => { ph += (215 + 18 * Math.sin(t * 38)) / SR; return (2 * (ph % 1) - 1) * .3 * Math.min(1, t / .08, (d - t) / .2) * (.7 + .3 * Math.sin(t * 90)); }); },
 };
 function readWav(file) {        // 16-bit PCM wav -> mono float at its own rate (resampled nearest to SR)

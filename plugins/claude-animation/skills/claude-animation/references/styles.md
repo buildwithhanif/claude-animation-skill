@@ -42,6 +42,22 @@ layer above a person matte, back half below it. Flat ring (vertical radius ≈ 1
 (~0.34 rad/s), land on the headline facing camera and hold ~2 s before turning. Temporal supersampling
 (6 samples) for motion blur while it flies in or out.
 
+## 5. Faceted low-poly poster (ambient loops)
+
+The "website footer / poster landscape" look: flat vector, no outlines on the world, every mass cut into
+lit triangles, depth from layers that fade into the haze. Calm, art-first, made to loop.
+- `facetMass(W, H, polygon, { ramp, light, cell, dome, fade, haze })`, baked once per layer in `setup()`.
+  Big cells (50–75 px) with low jitter (~0.22); small cells and high jitter read as noise, not facets.
+- Layers back to front: sky gradient + sun glow → far ridge (fade .55) → mid ridge (.3) → mesas (.18) →
+  floor + water → the moving subject → foreground framing masses (no fade, darkest shadows).
+- Pillars and cliffs get `dome: [centreX, halfWidth]` so the lit side and the shadow side split like a
+  column; ramps run plum → magenta → orange (canyon) or navy → blue → pale (ice).
+- The character is the only outlined thing: it reads as "drawn" against a painted world.
+- Loops: every motion periodic in the loop length (clouds wrap exactly 1–2 times, birds every half-loop,
+  the subject crosses once, rotations by a symmetric multiple). Check frame 0 against the last frame.
+- Sound: `scripts/ambient.mjs` (pads, sparse bells, wind) with bars that divide the loop, plus a few
+  diegetic sounds (`burner`, `chirp`). No music hook.
+
 ## Matching a new reference
 
 Make a swatch sheet before the film: paper, ink line at three weights, each material's three layers, one
