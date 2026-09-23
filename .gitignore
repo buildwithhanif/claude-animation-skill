@@ -1,0 +1,5 @@
+node_modules
+out/
+ref/
+*.mix.wav
+.DS_Store

@@ -1,0 +1,11 @@
+{
+  "name": "claude-animation",
+  "displayName": "Claude Animation",
+  "description": "Hand-drawn 2D animation written as code. Textured-editorial and brush-watercolour looks, a detailed poseable ant, an ant colony kit, a render harness with sheet/strip/verify, and synthesised sound.",
+  "version": "1.0.0",
+  "author": { "name": "Hanif", "url": "https://github.com/buildwithhanif" },
+  "homepage": "https://github.com/buildwithhanif/claude-animation-skill",
+  "repository": "https://github.com/buildwithhanif/claude-animation-skill",
+  "license": "MIT",
+  "keywords": ["animation", "2d", "hand-drawn", "canvas", "javascript", "ffmpeg"]
+}

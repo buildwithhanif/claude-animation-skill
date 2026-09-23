@@ -1,0 +1,18 @@
+{
+  "name": "claude-animation-skill",
+  "description": "Hand-drawn 2D animation written as code: textured-editorial and brush-watercolour looks, a detailed ant rig, an ant colony kit, synthesised sound.",
+  "version": "1.0.0",
+  "owner": { "name": "Hanif", "url": "https://github.com/buildwithhanif" },
+  "plugins": [
+    {
+      "name": "claude-animation",
+      "source": "./plugins/claude-animation",
+      "description": "Make short hand-drawn animations in JavaScript (node canvas + ffmpeg): brush, pencil, watercolour, grain and hatching; poseable rigs and a colony kit; sheet/strip/verify previews; synthesised SFX and music.",
+      "category": "content",
+      "keywords": ["animation", "2d", "hand-drawn", "canvas", "javascript", "storybook", "illustration", "ffmpeg", "colony"],
+      "license": "MIT",
+      "homepage": "https://github.com/buildwithhanif/claude-animation-skill",
+      "repository": "https://github.com/buildwithhanif/claude-animation-skill"
+    }
+  ]
+}
