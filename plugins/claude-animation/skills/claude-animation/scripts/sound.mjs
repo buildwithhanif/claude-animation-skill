@@ -10,7 +10,8 @@
 // The mix gets a two-pass loudnorm (default -16 LUFS), then a 4x-oversampled limiter at -3.1 dBFS (AAC adds ~1.5 dB of inter-sample overshoot) so dense
 // hit-heavy mixes can't overshoot (a game mix hit +1.6 dBTP without it), and is muxed onto the picture.
 import fs from "node:fs";
-import { execFileSync } from "node:child_process";
+import { execFileSync, spawnSync } from "node:child_process";
+import path from "node:path";
 
 const SR = 48000;
 const R = (() => { let s = 9; return () => (s = (s * 16807) % 2147483647) / 2147483647 * 2 - 1; })();
@@ -60,13 +61,24 @@ export function mix(cues, dur, bed, bedVol = .5, bedAt = 0) {
 }
 if (process.argv[1] && process.argv[1].endsWith("sound.mjs")) {
   const [, , cueFile, pic, out] = process.argv, a = process.argv, opt = (k, d) => a.includes(k) ? a[a.indexOf(k) + 1] : d;
-  const dur = parseFloat(execFileSync("ffprobe", ["-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", pic]).toString());
-  const [L, Rr] = mix(JSON.parse(fs.readFileSync(cueFile, "utf8")), dur, opt("--bed"), parseFloat(opt("--bed-vol", ".5")), parseFloat(opt("--bed-at", "0")));
-  const tmp = out.replace(/\.mp4$/, "") + ".mix.wav"; writeWav(tmp, L, Rr);
-  const I = opt("--lufs", "-16");
-  let meas; try { meas = JSON.parse((execFileSync("sh", ["-c", `ffmpeg -hide_banner -nostats -i "${tmp}" -af loudnorm=I=${I}:TP=-1.5:print_format=json -f null - 2>&1`]).toString().match(/\{[^{]*input_i[\s\S]*?\}/) || ["{}"])[0]); } catch { meas = {}; }
-  const ln = meas.input_i ? `loudnorm=I=${I}:TP=-1.5:LRA=11:measured_I=${meas.input_i}:measured_TP=${meas.input_tp}:measured_LRA=${meas.input_lra}:measured_thresh=${meas.input_thresh}:linear=true,aresample=192000,alimiter=limit=0.7:level=false:attack=1:release=40,aresample=48000` : `loudnorm=I=${I}:TP=-1.5,alimiter=limit=0.7:level=false`;
-  execFileSync("ffmpeg", ["-v", "error", "-y", "-i", pic, "-i", tmp, "-af", ln, "-c:v", "copy", "-c:a", "aac", "-b:a", "192k", "-shortest", "-movflags", "+faststart", out]);
-  fs.unlinkSync(tmp);
-  console.log("wrote", out, meas.input_i ? `(mix was ${meas.input_i} LUFS)` : "");
+  const I = Number(opt("--lufs", "-16"));
+  if (!opt("--lufs", "-16")?.trim() || !Number.isFinite(I) || I < -70 || I > -5) throw new Error("--lufs must be a finite number between -70 and -5");
+  const target = path.resolve(out);
+  const stage = fs.mkdtempSync(path.join(path.dirname(target), ".sound-"));
+  try {
+    const dur = parseFloat(execFileSync("ffprobe", ["-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", pic]).toString());
+    const [L, Rr] = mix(JSON.parse(fs.readFileSync(cueFile, "utf8")), dur, opt("--bed"), parseFloat(opt("--bed-vol", ".5")), parseFloat(opt("--bed-at", "0")));
+    const tmp = path.join(stage, "mix.wav"); writeWav(tmp, L, Rr);
+    let meas = {};
+    try {
+      const probe = spawnSync("ffmpeg", ["-hide_banner", "-nostats", "-i", tmp, "-af", `loudnorm=I=${I}:TP=-1.5:print_format=json`, "-f", "null", "-"], { encoding: "utf8" });
+      if (!probe.error && probe.status === 0) meas = JSON.parse((probe.stderr.match(/\{[^{]*input_i[\s\S]*?\}/) || ["{}"])[0]);
+    } catch { /* Measurement failures retain the existing one-pass fallback. */ }
+    const measured = ["input_i", "input_tp", "input_lra", "input_thresh"].every((key) => typeof meas[key] === "string" && Number.isFinite(Number(meas[key])));
+    const ln = measured ? `loudnorm=I=${I}:TP=-1.5:LRA=11:measured_I=${meas.input_i}:measured_TP=${meas.input_tp}:measured_LRA=${meas.input_lra}:measured_thresh=${meas.input_thresh}:linear=true,aresample=192000,alimiter=limit=0.7:level=false:attack=1:release=40,aresample=48000` : `loudnorm=I=${I}:TP=-1.5,alimiter=limit=0.7:level=false`;
+    const encoded = path.join(stage, path.basename(target));
+    execFileSync("ffmpeg", ["-v", "error", "-y", "-i", pic, "-i", tmp, "-af", ln, "-c:v", "copy", "-c:a", "aac", "-b:a", "192k", "-shortest", "-movflags", "+faststart", encoded]);
+    fs.renameSync(encoded, target);
+    console.log("wrote", out, measured ? `(mix was ${meas.input_i} LUFS)` : "");
+  } finally { fs.rmSync(stage, { recursive: true, force: true }); }
 }
