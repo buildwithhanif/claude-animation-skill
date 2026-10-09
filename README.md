@@ -131,3 +131,24 @@ examples/ant-colony/       the 32 s colony film
 ```
 
 Ideas from other animation skills are credited in `references/prior-art.md`.
+
+
+### Safe local rendering and verification
+
+Run the offline regression suite with Node 20+, FFmpeg/ffprobe and the canvas
+package installed: `node --test test/safety.test.mjs`.
+
+Sound measurement invokes FFmpeg directly; `--lufs` must be a complete finite
+number between -70 and -5. Output filenames are local path data. Sound mixing
+and rendering use private per-run staging and publish only completed outputs,
+so failed encodes do not overwrite an existing master or promote stale files.
+Film names must be plain filenames without directory separators.
+
+A short output-directory `.publish-lock` serializes film output sets and their
+receipts, including case-insensitive filename aliases. Encoding remains
+concurrent. A publisher waits up to ten seconds; on timeout, retry after the
+other publisher finishes. After an abrupt process termination, remove a stale
+lock only after verifying no publisher is active. Ordinary failures clean their
+own stage; stages left by a terminated process are never promoted by a later
+run. Renames are atomic per file, not a transaction surviving power failure
+across a matte pair. Sheet, strip and verify modes retain their existing paths.

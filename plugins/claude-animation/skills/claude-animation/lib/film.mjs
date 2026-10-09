@@ -66,19 +66,51 @@ export async function run(F) {
     console.log("ok: frames", pick.join(", "), "identical in and out of order"); return; }
 
   // render: stage, encode, then publish; a failed encode never replaces a good file
-  const stage = path.join(out, ".staging"); fs.mkdirSync(stage, { recursive: true });
   const name = F.name || "film", t0 = Date.now();
+  if (name === "." || name === ".." || /[/\\\0]/.test(name)) throw new Error("film name must be a plain filename without directory separators");
+  const stage = fs.mkdtempSync(path.join(out, ".staging-"));
+  const made = F.alpha === "matte" ? [name + "-rgb.mp4", name + "-matte.mp4"] : [name + (F.alpha === "prores" ? ".mov" : ".mp4")];
   const base = ["-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "rgba", "-s", `${W}x${H}`, "-r", String(fps), "-i", "-"];
   const outs = F.alpha === "matte"
-    ? ["-filter_complex", "[0]split[a][b];[a]format=rgb24,format=yuv420p[c];[b]alphaextract,format=yuv420p[m]", "-map", "[c]", "-c:v", "libx264", "-crf", "14", path.join(stage, name + "-rgb.mp4"), "-map", "[m]", "-c:v", "libx264", "-crf", "11", path.join(stage, name + "-matte.mp4")]
-    : F.alpha === "prores" ? ["-c:v", "prores_ks", "-profile:v", "4444", "-pix_fmt", "yuva444p10le", path.join(stage, name + ".mov")]
-    : ["-c:v", "libx264", "-crf", String(F.crf ?? 15), "-preset", "medium", "-pix_fmt", "yuv420p", path.join(stage, name + ".mp4")];
-  const ff = spawn("ffmpeg", [...base, ...outs], { stdio: ["pipe", "inherit", "inherit"] });
-  for (let i = 0; i < N; i++) { const d = pixels(i); await new Promise((r) => ff.stdin.write(Buffer.from(d.buffer, d.byteOffset, d.byteLength)) ? r() : ff.stdin.once("drain", r));
-    if (i % (fps * 5) === 0) process.stdout.write(`  ${(i / fps).toFixed(1)}s\n`); }
-  ff.stdin.end(); const code = await new Promise((r) => ff.on("close", r));
-  if (code !== 0) { console.error("encode failed; previous outputs left untouched"); process.exit(1); }
-  const made = fs.readdirSync(stage); for (const f of made) fs.renameSync(path.join(stage, f), path.join(out, f));
-  fs.writeFileSync(path.join(out, name + ".render.json"), JSON.stringify({ name, W, H, fps, dur: F.dur, frames: N, seconds: (Date.now() - t0) / 1000, files: made }, null, 1));
-  console.log(`rendered ${N} frames in ${((Date.now() - t0) / 1000).toFixed(0)}s -> ${made.join(", ")}`);
+    ? ["-filter_complex", "[0]split[a][b];[a]format=rgb24,format=yuv420p[c];[b]alphaextract,format=yuv420p[m]", "-map", "[c]", "-c:v", "libx264", "-crf", "14", path.join(stage, made[0]), "-map", "[m]", "-c:v", "libx264", "-crf", "11", path.join(stage, made[1])]
+    : F.alpha === "prores" ? ["-c:v", "prores_ks", "-profile:v", "4444", "-pix_fmt", "yuva444p10le", path.join(stage, made[0])]
+    : ["-c:v", "libx264", "-crf", String(F.crf ?? 15), "-preset", "medium", "-pix_fmt", "yuv420p", path.join(stage, made[0])];
+  const publishLock = path.join(out, ".publish-lock");
+  let ff, closed, locked = false;
+  try {
+    ff = spawn("ffmpeg", [...base, ...outs], { stdio: ["pipe", "inherit", "inherit"] });
+    closed = new Promise((resolve) => { ff.once("error", (error) => resolve({ error })); ff.once("close", (code) => resolve({ code })); });
+    ff.stdin.on("error", () => {}); // write callbacks report EPIPE without an unhandled stream error
+    for (let i = 0; i < N; i++) {
+      const d = pixels(i);
+      await new Promise((resolve, reject) => ff.stdin.write(Buffer.from(d.buffer, d.byteOffset, d.byteLength), (error) => error ? reject(error) : resolve()));
+      if (i % (fps * 5) === 0) process.stdout.write(`  ${(i / fps).toFixed(1)}s\n`);
+    }
+    ff.stdin.end(); const result = await closed;
+    if (result.error) throw result.error;
+    if (result.code !== 0) throw new Error("encode failed; previous outputs left untouched");
+    for (const file of made) if (!fs.statSync(path.join(stage, file)).isFile()) throw new Error("missing encoded output: " + file);
+    const receipt = name + ".render.json";
+    fs.writeFileSync(path.join(stage, receipt), JSON.stringify({ name, W, H, fps, dur: F.dur, frames: N, seconds: (Date.now() - t0) / 1000, files: made }, null, 1));
+    // Serialize publication in this output directory across processes, including
+    // case/Unicode filename aliases on case-insensitive filesystems.
+    const lockDeadline = Date.now() + 10000;
+    while (!locked) {
+      try { fs.mkdirSync(publishLock); locked = true; }
+      catch (error) {
+        if (error.code !== "EEXIST") throw error;
+        if (Date.now() >= lockDeadline) throw new Error("publication busy; retry after the other publisher finishes (remove a stale .publish lock only after verifying no publisher is active)");
+        await new Promise((resolve) => setTimeout(resolve, 25));
+      }
+    }
+    for (const file of [...made, receipt]) fs.renameSync(path.join(stage, file), path.join(out, file));
+    console.log(`rendered ${N} frames in ${((Date.now() - t0) / 1000).toFixed(0)}s -> ${made.join(", ")}`);
+  } catch (error) {
+    if (ff && ff.exitCode === null) ff.kill();
+    if (closed) await closed;
+    throw error;
+  } finally {
+    if (locked) fs.rmdirSync(publishLock);
+    fs.rmSync(stage, { recursive: true, force: true });
+  }
 }
